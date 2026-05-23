@@ -39,7 +39,7 @@ security_rule {
     access                    = "Allow"
     protocol                  = "Tcp"
     source_port_range         = "*"
-    destination_port_range    = ["80", "443"]
+    destination_port_ranges    = ["80", "443"]
     source_address_prefix     = "internet"
     destination_address_prefix = "*"
   }
