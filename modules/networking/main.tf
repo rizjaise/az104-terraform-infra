@@ -1,3 +1,4 @@
+#Vnet 1
 resource "azurerm_virtual_network" "main" {
     name                = "SpecterVNet-Dev"
     location            = var.location
@@ -147,4 +148,63 @@ resource "azurerm_subnet_network_security_group_association" "data" {
     network_security_group_id = azurerm_network_security_group.data.id
 }
 
+#Vnet 2
+resource "azurerm_virtual_network" "secondary" {
+    name                = "SpecterVNetSecondary-Dev"
+    location            = var.location
+    resource_group_name = var.resource_group_name
+    address_space       = ["192.168.0.0/16"]
+}
 
+resource "azurerm_subnet" "secondary" {
+    name                 = "SpecterSubnetSecondary-Dev"
+    resource_group_name  = var.resource_group_name
+    virtual_network_name = azurerm_virtual_network.secondary.name
+    address_prefixes     = ["192.168.1.0/24"]
+}
+
+#Peering Primary to Secondary
+resource "azurerm_virtual_network_peering" "primary_to_secondary" {
+    name                      = "peer-primary-to-secondary"
+    resource_group_name       = var.resource_group_name
+    virtual_network_name      = azurerm_virtual_network.main.name
+    remote_virtual_network_id = azurerm_virtual_network.secondary.id
+    allow_forwarded_traffic   = true
+    allow_gateway_transit     = false
+    use_remote_gateways       = false
+}
+
+#Peering Secondary to Primary
+resource "azurerm_virtual_network_peering" "secondary_to_primary" {
+    name                      = "peer-secondary-to-primary"
+    resource_group_name       = var.resource_group_name
+    virtual_network_name      = azurerm_virtual_network.secondary.name
+    remote_virtual_network_id = azurerm_virtual_network.main.id
+    allow_forwarded_traffic   = true
+    allow_gateway_transit     = false
+    use_remote_gateways       = false
+}
+
+#Private DNS Zone
+resource "azurerm_private_dns_zone" "main" {
+  name = "specterdev.internal"
+  resource_group_name = var.resource_group_name
+}
+
+#Link Private DNS Zone to Vnet 1
+resource "azurerm_private_dns_zone_virtual_network_link" "primary" {
+  name                  = "dns-link-primary"
+  resource_group_name   = var.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.main.name
+  virtual_network_id    = azurerm_virtual_network.main.id
+  registration_enabled = true
+}
+
+#Link Private DNS Zone to Vnet 2
+resource "azurerm_private_dns_zone_virtual_network_link" "secondary" {
+  name                  = "dns-link-secondary"
+  resource_group_name   = var.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.main.name
+  virtual_network_id    = azurerm_virtual_network.secondary.id
+  registration_enabled = false
+}
