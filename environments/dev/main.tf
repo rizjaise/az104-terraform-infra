@@ -16,7 +16,7 @@ terraform {
 
   resource "azurerm_resource_group" "rg" {
     name     = "SpecterRG-Dev"
-    location = "South India"
+    location = "East US"
   }
 
   module "networking" {
