@@ -11,6 +11,8 @@ env:
   ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
   ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  TF_VAR_vm_admin_username: ${{ secrets.TF_VAR_vm_admin_username }}
+  TF_VAR_vm_admin_password: ${{ secrets.TF_VAR_vm_admin_password }}
 
 jobs:
   terraform:
