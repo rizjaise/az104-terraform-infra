@@ -39,7 +39,7 @@ resource "azurerm_lb_probe" "main" {
 resource "azurerm_lb_rule" "main" {
     loadbalancer_id         = azurerm_lb.main.id
     name                    = "http-rule-specter"
-    protocol                = "Http"
+    protocol                = "Tcp"
     frontend_port           = 80
     backend_port            = 80
     frontend_ip_configuration_name = "frontend-ip"
@@ -58,24 +58,24 @@ resource "azurerm_availability_set" "main" {
 
 #Network Interface
 resource "azurerm_network_interface" "vm" {
-    count               = 2
-    name                = "nic-vm-${count.index}"
-    location            = var.location
-    resource_group_name = var.resource_group_name
+  count               = 2
+  name                = "nic-vm-${count.index}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
 
-    ip_configuration {
-        name                          = "ipconfig-specter"
-        subnet_id                     = var.subnet_web_id
-        private_ip_address_allocation = "Dynamic"
-    }
+  ip_configuration {
+    name                          = "ipconfig-specter"
+    subnet_id                     = var.subnet_web_id
+    private_ip_address_allocation = "Dynamic"
+  }
 }
 
 #Associate Network Interface with Backend Pool
-resource "azurerm_lb_backend_address_pool_association" "main" {
-    count                   = 2
-    backend_address_pool_id = azurerm_lb_backend_address_pool.main.id
-    network_interface_id    = azurerm_network_interface.vm[count.index].id
-    ipconfiguration_name     = "ipconfig"
+resource "azurerm_network_interface_backend_address_pool_association" "main" {
+  count                   = 2
+  network_interface_id    = azurerm_network_interface.vm[count.index].id
+  ip_configuration_name   = "ipconfig"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.main.id
 }
 
 #Virtual Machine
