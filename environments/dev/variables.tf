@@ -1,5 +1,5 @@
 variable "location" {
-  default = "South India"
+  default = "East US"
 }
 
 variable "environment" {

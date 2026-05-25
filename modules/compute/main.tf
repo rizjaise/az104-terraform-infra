@@ -84,7 +84,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
     name                = "vm-specter-${count.index}"
     location            = var.location
     resource_group_name = var.resource_group_name
-    size                = "Standard_B1ms"
+    size                = "Standard_B1s"
     admin_username      = var.vm_admin_username
     admin_password      = var.vm_admin_password
     availability_set_id = azurerm_availability_set.main.id
