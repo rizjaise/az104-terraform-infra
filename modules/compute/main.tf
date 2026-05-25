@@ -42,7 +42,7 @@ resource "azurerm_lb_rule" "main" {
     protocol                = "Tcp"
     frontend_port           = 80
     backend_port            = 80
-    frontend_ip_configuration_name = "frontend-ip"
+    frontend_ip_configuration_name = "lb-specter-fe"
     backend_address_pool_ids = [azurerm_lb_backend_address_pool.main.id]
     probe_id                = azurerm_lb_probe.main.id
 }
@@ -74,7 +74,7 @@ resource "azurerm_network_interface" "vm" {
 resource "azurerm_network_interface_backend_address_pool_association" "main" {
   count                   = 2
   network_interface_id    = azurerm_network_interface.vm[count.index].id
-  ip_configuration_name   = "ipconfig"
+  ip_configuration_name   = "ipconfig-specter"
   backend_address_pool_id = azurerm_lb_backend_address_pool.main.id
 }
 
@@ -84,7 +84,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
     name                = "vm-specter-${count.index}"
     location            = var.location
     resource_group_name = var.resource_group_name
-    size                = "Standard_B1s"
+    size                = "Standard_B2ts_v2"
     admin_username      = var.vm_admin_username
     admin_password      = var.vm_admin_password
     availability_set_id = azurerm_availability_set.main.id
