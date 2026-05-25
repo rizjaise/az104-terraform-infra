@@ -4,3 +4,4 @@ output "lb_public_ip" {
 
 output "vm_names" {
     value = azurerm_windows_virtual_machine.main[*].name
+}
