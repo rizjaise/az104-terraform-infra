@@ -27,3 +27,20 @@ Azure platform foundation project implementing secure networking, compute, stora
   and mandatory NSG enforcement
 - Health probes automatically remove unhealthy VMs from load balancer rotation
 - count meta-argument used to deploy identical resources without code repetition
+
+### App Service (Planned)
+- App Service Plan: Linux B1 SKU
+- Identity: User-assigned Managed Identity (id-specter-appservice)
+- App name: globally unique via random string suffix
+- Always-on disabled (B1 tier limitation)
+
+> Note: App Service deployment skipped due to Azure free tier quota 
+> restrictions. Terraform code written and validated via terraform plan.
+> Code available in modules/compute/appservice.tf
+
+### Key Concepts Covered
+- User-assigned Managed Identity chosen over system-assigned for 
+  reusability across multiple resources
+- App name requires global uniqueness — azurewebsites.net is a shared 
+  public namespace
+- always_on = false required on B1 tier — needs B2 or higher to enable
