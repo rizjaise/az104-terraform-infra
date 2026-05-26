@@ -44,3 +44,34 @@ Azure platform foundation project implementing secure networking, compute, stora
 - App name requires global uniqueness — azurewebsites.net is a shared 
   public namespace
 - always_on = false required on B1 tier — needs B2 or higher to enable
+
+## Storage
+### Resources Deployed
+- Storage Account: Standard LRS with TLS 1.2 enforced
+- Blob Container: private access (no public exposure)
+- Azure File Share: 5GB quota
+- Lifecycle Management Policy
+
+### Lifecycle Policy Rules
+| Trigger | Action |
+|---|---|
+| 30 days since last modification | Move blob to Cool tier |
+| 90 days since last modification | Move blob to Archive tier |
+| 365 days since last modification | Delete blob |
+| 30 days since snapshot creation | Delete snapshot |
+
+### Security Configurations
+- `container_access_type = "private"` — no anonymous public access
+- `min_tls_version = "TLS1_2"` — blocks older insecure TLS versions
+- Blob versioning enabled — protects against accidental overwrites
+- Soft delete retention: 7 days for blobs and containers
+
+### Key Concepts Covered
+- Blob Storage vs Azure Files: Blob accessed via REST API for 
+  unstructured data; Azure Files uses SMB/NFS protocol and can be 
+  mounted as a network drive for lift-and-shift scenarios
+- SAS tokens delegate limited scoped access without exposing 
+  storage account keys — scope, permissions and expiry are explicit
+- Three SAS types: Account SAS (full account), Service SAS 
+  (single service), User Delegation SAS (Entra ID backed, most secure)
+- Hot/Cool/Archive tiers balance storage cost against access frequency
