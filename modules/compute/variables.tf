@@ -5,3 +5,12 @@ variable vm_admin_username{}
 variable vm_admin_password{
     sensitive = true
 }
+
+terraform {
+    required_providers {
+        random = {
+            source  = "hashicorp/random"
+            version = "~> 3.0"
+        }
+    }
+}
