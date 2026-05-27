@@ -13,6 +13,8 @@ env:
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
   TF_VAR_vm_admin_username: ${{ secrets.TF_VAR_vm_admin_username }}
   TF_VAR_vm_admin_password: ${{ secrets.TF_VAR_vm_admin_password }}
+  TF_VAR_hspecter_upn: ${{ secrets.TF_VAR_hspecter_upn }}
+  TF_VAR_mross_upn: ${{ secrets.TF_VAR_mross_upn }}
 
 jobs:
   terraform:
