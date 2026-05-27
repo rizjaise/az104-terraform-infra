@@ -34,3 +34,9 @@ terraform {
     vm_admin_password   = var.vm_admin_password
 
   }
+
+  module "storage" {
+    source = "../../modules/storage"
+    location            = var.location
+    resource_group_name = azurerm_resource_group.rg.name
+  }
