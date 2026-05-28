@@ -27,3 +27,91 @@ Azure platform foundation project implementing secure networking, compute, stora
   and mandatory NSG enforcement
 - Health probes automatically remove unhealthy VMs from load balancer rotation
 - count meta-argument used to deploy identical resources without code repetition
+
+### App Service (Planned)
+- App Service Plan: Linux B1 SKU
+- Identity: User-assigned Managed Identity (id-specter-appservice)
+- App name: globally unique via random string suffix
+- Always-on disabled (B1 tier limitation)
+
+> Note: App Service deployment skipped due to Azure free tier quota 
+> restrictions. Terraform code written and validated via terraform plan.
+> Code available in modules/compute/appservice.tf
+
+### Key Concepts Covered
+- User-assigned Managed Identity chosen over system-assigned for 
+  reusability across multiple resources
+- App name requires global uniqueness — azurewebsites.net is a shared 
+  public namespace
+- always_on = false required on B1 tier — needs B2 or higher to enable
+
+## Storage
+### Resources Deployed
+- Storage Account: Standard LRS with TLS 1.2 enforced
+- Blob Container: private access (no public exposure)
+- Azure File Share: 5GB quota
+- Lifecycle Management Policy
+
+### Lifecycle Policy Rules
+| Trigger | Action |
+|---|---|
+| 30 days since last modification | Move blob to Cool tier |
+| 90 days since last modification | Move blob to Archive tier |
+| 365 days since last modification | Delete blob |
+| 30 days since snapshot creation | Delete snapshot |
+
+### Security Configurations
+- `container_access_type = "private"` — no anonymous public access
+- `min_tls_version = "TLS1_2"` — blocks older insecure TLS versions
+- Blob versioning enabled — protects against accidental overwrites
+- Soft delete retention: 7 days for blobs and containers
+
+### Key Concepts Covered
+- Blob Storage vs Azure Files: Blob accessed via REST API for 
+  unstructured data; Azure Files uses SMB/NFS protocol and can be 
+  mounted as a network drive for lift-and-shift scenarios
+- SAS tokens delegate limited scoped access without exposing 
+  storage account keys — scope, permissions and expiry are explicit
+- Three SAS types: Account SAS (full account), Service SAS 
+  (single service), User Delegation SAS (Entra ID backed, most secure)
+- Hot/Cool/Archive tiers balance storage cost against access frequency
+
+## Identity & Governance
+### RBAC Role Assignments
+| User | Role | Scope |
+|---|---|---|
+| Hspecter | Contributor | SpecterRG-Dev |
+| MRoss | Reader | SpecterRG-Dev |
+
+### Custom Role — VM Operator
+- Defined at subscription scope for reusability
+- Permissions: start, stop, restart, read VMs only
+- Cannot create or delete VMs — principle of least privilege
+- Assigned to Hspecter on SpecterRG-Dev
+
+### Azure Policies
+| Policy | Effect | Scope |
+|---|---|---|
+| Require environment and owner tags | Audit | SpecterRG-Dev |
+| Allow East US location only | Deny | SpecterRG-Dev |
+
+- Tagging policy uses audit not deny — avoids breaking 
+  existing untagged resources while providing compliance visibility
+- Location policy uses deny — actively prevents misdeployment 
+  to unintended regions
+
+### Resource Locks
+- ReadOnly lock on Storage Account — prevents accidental 
+  deletion and modification
+- CanNotDelete vs ReadOnly distinction: CanNotDelete allows 
+  modifications, ReadOnly blocks both modifications and deletion
+
+### Key Concepts Covered
+- Role Assignment = Who + What + Where (identity, role, scope)
+- Owner vs Contributor: Owner can manage access, Contributor cannot
+- Permissions inherit downward: Management Group → Subscription 
+  → Resource Group → Resource
+- azuread provider manages Entra ID objects separately from 
+  azurerm which manages Azure resources
+- Custom roles defined at subscription scope are assignable 
+  anywhere within that subscription
