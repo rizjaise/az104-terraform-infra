@@ -75,3 +75,43 @@ Azure platform foundation project implementing secure networking, compute, stora
 - Three SAS types: Account SAS (full account), Service SAS 
   (single service), User Delegation SAS (Entra ID backed, most secure)
 - Hot/Cool/Archive tiers balance storage cost against access frequency
+
+## Identity & Governance
+### RBAC Role Assignments
+| User | Role | Scope |
+|---|---|---|
+| Hspecter | Contributor | SpecterRG-Dev |
+| MRoss | Reader | SpecterRG-Dev |
+
+### Custom Role — VM Operator
+- Defined at subscription scope for reusability
+- Permissions: start, stop, restart, read VMs only
+- Cannot create or delete VMs — principle of least privilege
+- Assigned to Hspecter on SpecterRG-Dev
+
+### Azure Policies
+| Policy | Effect | Scope |
+|---|---|---|
+| Require environment and owner tags | Audit | SpecterRG-Dev |
+| Allow East US location only | Deny | SpecterRG-Dev |
+
+- Tagging policy uses audit not deny — avoids breaking 
+  existing untagged resources while providing compliance visibility
+- Location policy uses deny — actively prevents misdeployment 
+  to unintended regions
+
+### Resource Locks
+- ReadOnly lock on Storage Account — prevents accidental 
+  deletion and modification
+- CanNotDelete vs ReadOnly distinction: CanNotDelete allows 
+  modifications, ReadOnly blocks both modifications and deletion
+
+### Key Concepts Covered
+- Role Assignment = Who + What + Where (identity, role, scope)
+- Owner vs Contributor: Owner can manage access, Contributor cannot
+- Permissions inherit downward: Management Group → Subscription 
+  → Resource Group → Resource
+- azuread provider manages Entra ID objects separately from 
+  azurerm which manages Azure resources
+- Custom roles defined at subscription scope are assignable 
+  anywhere within that subscription
